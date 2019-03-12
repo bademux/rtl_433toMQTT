@@ -1,5 +1,6 @@
-#FROM alarm32v7/alpine:3.9
-FROM alpine:3.9
+# https://github.com/docker-library/official-images#architectures-other-than-amd64
+ARG ARCH=amd64
+FROM $ARCH/alpine:3.9
 
 MAINTAINER bademux
 
