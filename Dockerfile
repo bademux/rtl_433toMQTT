@@ -38,5 +38,5 @@ RUN apk del git cmake build-base bash && \
 
 WORKDIR /
 
-ENTRYPOINT rtl_433 -F json ${RTL_ARGS} | mosquitto_pub -l --id RTL_433 --url ${MQTT_URL} ${MOSQUITTO_ARGS}
+ENTRYPOINT sh /entrypoint.sh
 
