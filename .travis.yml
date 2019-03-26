@@ -1,19 +1,52 @@
 dist: xenial
+os: linux
+language: shell
 
 services:
   - docker
 
+env:
+  global:
+    - DOCKER_PLATFORMS="linux/amd64,linux/arm/v6,linux/arm64/v8"
+    - DOCKER_COMMIT=${TRAVIS_COMMIT::6}
+    - DOCKER_TAG="${TRAVIS_TAG}"
+    - DOCKER_IMAGE="bademux/rtl_433tomqtt"
+    - secure: xE9GH5yU6wxUUDo4yWYdg/4lJX3SRqMtftAueOEHeNeZpDz7CBXL9f+Q3ZkqEAIJZIodT3473EUhhxK2fMB9jfWS2K0f1I6WC7WhUakvWYesXO97DT5peOYgqAYOmrUoDGs+YEF3UgwkTtFw6oKFm9IXzCgOYYIqWcp/jY2c8XQgZuBw0y6aEtQJ9EljFFigii2nbwVGgL+GTipvkU1DcocBYT14VWSOSBspxKCbPxIWQEn/sbMMvfS0LX0IwCG55xfC5OTUV8U7QXgOPFqgx2Ihn2xsH8CjcnYd/9JvUltebLT2cqH4hIdIKQpJKvNxgNxZ4N25rZvmO2fUFHpVUG8j/jn766S2UehC4VnCI4RvstHOB0FVEpLw2/+5QiXnvcGuyDGIrN3SHrNcvEXKEcJWY9zPJ0Z/Gh1Xal5YoDebdJAQ+uX3AZGsSBwlZES3yVCGF+BUGvKtEQH/ni+HZGDhaW2sAZQpgwYA4RKT7LpzSzSbsU/L4RnYxe2M1DkfIjbu/f4IeVyegxDgnwrW+bla4hJUWCwutKLfRh635qAcD2yOy3oRuypaq0ctItOBIYPEfsd7c3/3c+Jo9UC93rQ/1m8h4ESIgVPczrLugOetW6AVvOaqTw9chG3Pcnv3IeC+986BRzICbBNSA2HH/6Vdm1rr6XOBtHHUys7pvFI=
+
+git:
+  depth: 1
+
 before_install:
-   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-   - dockerName="$DOCKER_USERNAME/rtl_433tomqtt:$TRAVIS_TAG" 
-   - docker build -t $dockerName .
-   - docker images
-   - docker push $dockerName
+  # Registering file format recognizers since RUN command is used
+  - sudo docker run --privileged linuxkit/binfmt:v0.8
+  # Update docker to the latest version and enable BuildKit
+  - bash ./.travis/scripts.sh update_docker
 
-deploy:
-  provider: script
-  script: docker push $dockerName
-  on:
-    branch: master
-    tags: true
+stages:
+  - name: build_amd64
+    if: branch != master AND tag IS blank
+  - name: build_and_deploy
+    if: tag =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/
 
+matrix:
+  include:
+    - stage: build_amd64
+      script:
+        - >-
+          bash ./.travis/scripts.sh build_images ${DOCKER_IMAGE} ${DOCKER_COMMIT} linux/amd64
+    - stage: build_and_deploy
+      script:
+        - >-
+          echo "${DOCKER_PASSWORD}" |
+          docker login -u "${DOCKER_USERNAME}" --password-stdin
+        - >-
+          ./.travis/scripts.sh build_images
+          ${DOCKER_IMAGE} ${TRAVIS_TAG} ${DOCKER_PLATFORMS} --push
+        - >-
+          bash ./.travis/scripts.sh push_readme
+          ${DOCKER_IMAGE} README.md
+          ${DOCKER_USERNAME} ${DOCKER_PASSWORD}
+
+
+notifications:
+  email: false
