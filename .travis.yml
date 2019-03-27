@@ -1,0 +1,51 @@
+sudo: required
+
+dist: xenial
+
+language: bash
+
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_PLATFORMS="linux/amd64,linux/arm/v6,linux/arm64/v8"
+    - DOCKER_COMMIT=${TRAVIS_COMMIT::6}
+    - DOCKER_TAG="${TRAVIS_TAG}"
+    - BUILDKIT_HOST=tcp://0.0.0.0:1234
+    - DOCKER_CLI_EXPERIMENTAL=enabled
+    - secure: jKCulzZk2ojkiN8OmQU1lHAbUNKi89rFeJYsZaTXJo2hG6hndTgz6kQii8pH8y6UhVNra/aScycC0M7ul1QMDy2R2ueXjN0zDqXA1HsHZ6pn+ZXdxdrNZ0m5ne3U7XWzRLCG1qYMlrrVMr1HP6YiBL9kS5f+gfnAPhr76DUM7OhzhYvz9rkBNg9C7WEeDYJbCV5mCleRZ5Jc5QoBMz3W5/ZKFG4b7XxXYdnKlEb8nLzbqWkxzwrsJbzBmiG5HCfLlHJnISCxj8MzCNz1k5RjXjegPexSw3LkLpAiWoTqlCpRKTCP3Kwz93Z8/dRNMLFMa/XYUT80vKp4hsNx0fkFRfrZM5oTFqgN4i7hp+HZQ++4ExC51drh2xSkiZVyN48OnqU1ZvwDcuYbgtKDQlFDxppVB6rcwJJeyaaao53MtlTXqnCj7Tub1TZ3GJbeECVdp8czAA9NkMjJX/VQ2cpabTl3BbYBIh/5UOmLo+U0/8K2olFCqtDKKH2qVW/9A+Rza+KeCP/heTSor4xiayEXl5GD0FYWhNsytafQnPkHiNu2RMbkQZwUe0BqzkJgmo4y7pZNKv8wukaRF8G0hZU6KbwplOawYmguFPPrz7ScW51gsei0GW9qmdQ+QHELfR5F35UwWKQlPv4os7zDV3yyDGs9PN8wD0uFC8pOSiyQ3Bk=
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+git:
+  depth: 1
+
+before_install: >
+  ./.travis/setup.sh \
+    "${DOCKER_PLATFORMS}"
+
+jobs:
+  include:
+    - script: >
+        ./.travis/build.sh \
+          "${DOCKER_IMAGE}" \
+          "${DOCKER_COMMIT}" \
+          "${DOCKER_PLATFORMS}"
+
+deploy:
+  provider: script
+  script: >-
+    bash ./.travis/push.sh
+    "${DOCKER_IMAGE}"
+    "${DOCKER_COMMIT}"
+    "${DOCKER_TAG}"
+    "${DOCKER_PLATFORMS}"
+  on:
+    tags: true
+
+notifications:
+  email: false

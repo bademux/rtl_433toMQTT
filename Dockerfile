@@ -1,6 +1,4 @@
-# https://github.com/docker-library/official-images#architectures-other-than-amd64
-ARG ARCH=amd64
-FROM $ARCH/alpine:3.9
+FROM alpine:3.9
 
 MAINTAINER bademux
 
@@ -10,7 +8,8 @@ ENV MOSQUITTO_ARGS=""
 
 COPY ./entrypoint.sh /
 
-RUN apk add --update git cmake build-base libusb-dev mosquitto-clients
+RUN apk add --no-cache libusb-dev mosquitto-clients && \
+    apk add --no-cache --virtual .build-deps git bash cmake build-base libusb-dev mosquitto-clients
 
 WORKDIR /tmp
 
@@ -33,9 +32,8 @@ RUN git clone https://github.com/merbanan/rtl_433.git && \
     make install && \
     cd / && \
     rm -rf /tmp/rtl_433
-
-RUN apk del git cmake build-base bash && \
-    rm -rf /var/cache/apk/*
+    
+RUN apk del .build-deps
 
 WORKDIR /
 
