@@ -1,9 +1,11 @@
-# RTL433 to mqtt gateway
+# Multiarch RTL433 to MQTT gateway docker
+
+[![Travis-CI](https://travis-ci.org/bademux/rtl_433toMQTT.svg)](https://travis-ci.org/bademux/rtl_433toMQTT)
 
 Ideas borrowed from https://github.com/roflmao/rtl2mqtt and https://github.com/mverleun/RTL433-to-mqttmttq
 Multiarch build conf for travis https://github.com/moikot/golang-dep
 
-# Run
+# HowTo
 To run on host 
 ```bash
 vidPid="0bda:2838"
@@ -22,3 +24,9 @@ to test it localy run:
 ```bash
 mosquitto_sub -t rtl_433
 ```
+
+
+#Links
+- git repo https://github.com/bademux/rtl_433toMQTT
+- docker repo https://hub.docker.com/r/bademux/rtl_433tomqtt
+
