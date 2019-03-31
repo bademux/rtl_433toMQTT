@@ -2,12 +2,6 @@ FROM alpine:3.9
 
 MAINTAINER bademux
 
-ENV MQTT_URL="mqtt://127.0.0.1:1883/rtl_433"
-ENV RTL_ARGS="-C si -M utc"
-ENV MOSQUITTO_ARGS=""
-
-COPY ./entrypoint.sh /
-
 RUN apk add --no-cache libusb-dev mosquitto-clients && \
     apk add --no-cache --virtual .build-deps git bash cmake build-base libusb-dev mosquitto-clients
 
@@ -37,5 +31,7 @@ RUN apk del .build-deps
 
 WORKDIR /
 
-ENTRYPOINT sh /entrypoint.sh
+COPY ./entrypoint.sh /
+
+ENTRYPOINT ["sh", "entrypoint.sh"]
 
