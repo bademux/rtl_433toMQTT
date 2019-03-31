@@ -31,7 +31,7 @@ RUN apk del .build-deps
 
 WORKDIR /
 
-COPY ./entrypoint.sh /
+COPY ./entrypoint.sh /opt
 
-ENTRYPOINT ["sh", "entrypoint.sh"]
+ENTRYPOINT ["sh", "/opt/entrypoint.sh"]
 
