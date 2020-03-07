@@ -1,3 +1,5 @@
+project is outdated, please use it as a sample 
+
 # Multiarch RTL433 to MQTT gateway docker
 
 [![Travis-CI](https://travis-ci.org/bademux/rtl_433toMQTT.svg)](https://travis-ci.org/bademux/rtl_433toMQTT)
