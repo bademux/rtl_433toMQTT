@@ -1,6 +1,6 @@
 #!/bin/ash
-RTL_ARGS=""
-MOSQUITTO_ARGS=""
+[  -z "$RTL_ARGS" ] && RTL_ARGS=""
+[  -z "$MOSQUITTO_ARGS" ] && MOSQUITTO_ARGS=""
 
 for i in "$@" ; do
 case $i in
