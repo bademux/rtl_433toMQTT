@@ -1,4 +1,3 @@
-project is outdated, please use it as a sample 
 
 # Multiarch RTL433 to MQTT gateway docker
 
@@ -27,6 +26,7 @@ to test it localy run:
 mosquitto_sub -t rtl_433
 ```
 
+Project is on hold.
 
 # Links
 - git repo https://github.com/bademux/rtl_433toMQTT
