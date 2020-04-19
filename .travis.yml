@@ -7,20 +7,18 @@ services:
 
 env:
   global:
-    - DOCKER_PLATFORMS="linux/amd64,linux/arm/v6,linux/arm64/v8"
+    - DOCKER_PLATFORMS="linux/amd64"
     - DOCKER_COMMIT=${TRAVIS_COMMIT::6}
     - DOCKER_TAG="${TRAVIS_TAG}"
     - DOCKER_IMAGE="bademux/rtl_433tomqtt"
-    - secure: xE9GH5yU6wxUUDo4yWYdg/4lJX3SRqMtftAueOEHeNeZpDz7CBXL9f+Q3ZkqEAIJZIodT3473EUhhxK2fMB9jfWS2K0f1I6WC7WhUakvWYesXO97DT5peOYgqAYOmrUoDGs+YEF3UgwkTtFw6oKFm9IXzCgOYYIqWcp/jY2c8XQgZuBw0y6aEtQJ9EljFFigii2nbwVGgL+GTipvkU1DcocBYT14VWSOSBspxKCbPxIWQEn/sbMMvfS0LX0IwCG55xfC5OTUV8U7QXgOPFqgx2Ihn2xsH8CjcnYd/9JvUltebLT2cqH4hIdIKQpJKvNxgNxZ4N25rZvmO2fUFHpVUG8j/jn766S2UehC4VnCI4RvstHOB0FVEpLw2/+5QiXnvcGuyDGIrN3SHrNcvEXKEcJWY9zPJ0Z/Gh1Xal5YoDebdJAQ+uX3AZGsSBwlZES3yVCGF+BUGvKtEQH/ni+HZGDhaW2sAZQpgwYA4RKT7LpzSzSbsU/L4RnYxe2M1DkfIjbu/f4IeVyegxDgnwrW+bla4hJUWCwutKLfRh635qAcD2yOy3oRuypaq0ctItOBIYPEfsd7c3/3c+Jo9UC93rQ/1m8h4ESIgVPczrLugOetW6AVvOaqTw9chG3Pcnv3IeC+986BRzICbBNSA2HH/6Vdm1rr6XOBtHHUys7pvFI=
+    - secure: hNCJ2wjE6bFmYBpvTfIFU/YQyjOBHupkNo9kXpHIKBRT4WLSGX4C9yUvGxmJA7JVUuWIpo1BKKAW4HYnx2Z/TFDIFR775sn1aZeUhAaLjgwJE47TserNB/th3hJTK3wO5KWjCLa50kO1Rwv37N2gCDouzzZKM13N3vqom+iDbzxsGYhoW8OCtoZDYCkTxdANJ6+jABa1R5A49H050/s/vwIiOS87rZUlcjYftwTW127+qSPrOBk+6RcYPVOZKt3aSOnPZOvT6mejCrqldsZ9MTnZg1rrokrIJgBn4ntAnBun9pa8czVni25vly0WWrHvFaz4Z671lK7AFsHzakR81bz/Y/WZnhjMRyr83h+Eq8jIoOJG68gw/jcbJc9MlG8ODoFRe2AEoSi5OZTToD6wZO8F0nH3NJIqG4uapnjMPh0iN70khqAFBuPuY0K0wInDNeU/GgARypj9+/MGzrigHhcgKdEA51TY8a6WFy+6uygS7JWZRzIBk54/GLrUY+0PrMXFAMDdOLxwAJo2Lk3DMCDH9PR6qUsGcdcPN9gNZnndAqliSd1NAY+i4SwgGQ4xAfgBzaazYc/0vKGvIFKtjUHaP8vLtr062I/VzZzh7C4VMmlaQV6zpu44zc8wlv2VxgA5z60LW04BKon7IxRh3Y+j/8pL0o7ClXtf+ZXKvMc=
 
 git:
   depth: 1
 
-before_install:
-  # Registering file format recognizers since RUN command is used
-  - sudo docker run --privileged linuxkit/binfmt:v0.8
-  # Update docker to the latest version and enable BuildKit
-  - bash ./.travis/scripts.sh update_docker
+before_install: bash ./.travis/builder.sh pre_install
+after_success: bash ./.travis/builder.sh post_install
+after_failure: bash ./.travis/builder.sh post_install
 
 stages:
   - name: build_amd64
@@ -31,22 +29,9 @@ stages:
 matrix:
   include:
     - stage: build_amd64
-      script:
-        - >-
-          bash ./.travis/scripts.sh build_images ${DOCKER_IMAGE} ${DOCKER_COMMIT} linux/amd64
+      script: bash ./.travis/builder.sh build ${DOCKER_IMAGE} ${DOCKER_COMMIT} "linux/amd64"
     - stage: build_and_deploy
-      script:
-        - >-
-          echo "${DOCKER_PASSWORD}" |
-          docker login -u "${DOCKER_USERNAME}" --password-stdin
-        - >-
-          ./.travis/scripts.sh build_images
-          ${DOCKER_IMAGE} ${TRAVIS_TAG} ${DOCKER_PLATFORMS} --push
-        - >-
-          bash ./.travis/scripts.sh push_readme
-          ${DOCKER_IMAGE} README.md
-          ${DOCKER_USERNAME} ${DOCKER_PASSWORD}
-
+      script: bash ./.travis/builder.sh build_and_deploy ${DOCKER_IMAGE} ${DOCKER_TAG} ${DOCKER_PLATFORMS}
 
 notifications:
   email: false
