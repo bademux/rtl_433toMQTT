@@ -5,7 +5,7 @@ ARG SOURCE_DIR=""
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64:/usr/local/lib"
 
 
-RUN apk add --no-cache --update git cmake build-base libusb-dev bash
+RUN apk add --no-cache --update cmake build-base libusb-dev bash
 
 ADD ./tmp /tmp/proj_tmp
 WORKDIR /tmp/proj_tmp

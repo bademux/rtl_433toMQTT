@@ -12,7 +12,7 @@ pre_install() {
   sudo docker run --privileged linuxkit/binfmt:v0.8
   # Update docker to the latest version and enable BuildKit
   bash ./.travis/scripts.sh update_docker
-  sudo apt-get -y install jq git
+  sudo apt-get -y install git
 }
 
 clone_source() {
