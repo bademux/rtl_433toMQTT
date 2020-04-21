@@ -7,10 +7,6 @@ services:
 
 env:
   global:
-    - DOCKER_PLATFORMS="linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8"
-    - DOCKER_COMMIT=${TRAVIS_COMMIT::6}
-    - DOCKER_TAG="${TRAVIS_TAG}"
-    - DOCKER_IMAGE="bademux/rtl_433tomqtt"
     - secure: hNCJ2wjE6bFmYBpvTfIFU/YQyjOBHupkNo9kXpHIKBRT4WLSGX4C9yUvGxmJA7JVUuWIpo1BKKAW4HYnx2Z/TFDIFR775sn1aZeUhAaLjgwJE47TserNB/th3hJTK3wO5KWjCLa50kO1Rwv37N2gCDouzzZKM13N3vqom+iDbzxsGYhoW8OCtoZDYCkTxdANJ6+jABa1R5A49H050/s/vwIiOS87rZUlcjYftwTW127+qSPrOBk+6RcYPVOZKt3aSOnPZOvT6mejCrqldsZ9MTnZg1rrokrIJgBn4ntAnBun9pa8czVni25vly0WWrHvFaz4Z671lK7AFsHzakR81bz/Y/WZnhjMRyr83h+Eq8jIoOJG68gw/jcbJc9MlG8ODoFRe2AEoSi5OZTToD6wZO8F0nH3NJIqG4uapnjMPh0iN70khqAFBuPuY0K0wInDNeU/GgARypj9+/MGzrigHhcgKdEA51TY8a6WFy+6uygS7JWZRzIBk54/GLrUY+0PrMXFAMDdOLxwAJo2Lk3DMCDH9PR6qUsGcdcPN9gNZnndAqliSd1NAY+i4SwgGQ4xAfgBzaazYc/0vKGvIFKtjUHaP8vLtr062I/VzZzh7C4VMmlaQV6zpu44zc8wlv2VxgA5z60LW04BKon7IxRh3Y+j/8pL0o7ClXtf+ZXKvMc=
 
 git:
@@ -29,9 +25,9 @@ stages:
 matrix:
   include:
     - stage: build_amd64
-      script: bash ./.travis/builder.sh build ${DOCKER_IMAGE} ${DOCKER_COMMIT} "linux/amd64"
+      script: bash ./.travis/builder.sh test_build ${TRAVIS_REPO_SLUG,,} ${TRAVIS_COMMIT::6}
     - stage: build_and_deploy
-      script: bash ./.travis/builder.sh build_and_deploy ${DOCKER_IMAGE} ${DOCKER_TAG} ${DOCKER_PLATFORMS}
+      script: bash ./.travis/builder.sh build_and_deploy ${TRAVIS_REPO_SLUG,,} ${TRAVIS_COMMIT::6}
 
 notifications:
   email: false
