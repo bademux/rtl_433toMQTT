@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - "!*" # for tags only 
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    env:
+      DOCKERHUB_USERNAME: bademux
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - 
+        name: Set Release Version
+        id: releaseVersion
+        run: echo ::set-output name=name::${GITHUB_REF#refs/*/}
+      - 
+        name: Set Docker Repository name 
+        id: dockerRepository
+        run: echo ::set-output name=name::$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+      -
+        name: Setup tags
+        id: releaseTag
+        env:
+          RELEASE_VERSION: ${{ steps.releaseVersion.outputs.name }}
+          IMAGE: ${{ steps.dockerRepository.outputs.name }}
+        run: |
+          echo "Building image '$IMAGE' for version $RELEASE_VERSION on $GITHUB_REF"
+          tags=()
+          if [[ "${RELEASE_VERSION}" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            declare -r major="${BASH_REMATCH[1]}"
+            declare -r minor="${BASH_REMATCH[2]}"
+            declare -r patch="${BASH_REMATCH[3]}"
+            # The manifests are listed on Docker Hub in reverse order.
+            tags+=("${IMAGE}:${major}")
+            tags+=("${IMAGE}:${major}.${minor}")
+            tags+=("${IMAGE}:${major}.${minor}.${patch}")
+            tags+=("${IMAGE}:latest")
+          else
+            tags+=("${IMAGE}:${RELEASE_VERSION}")
+          fi
+           echo ::set-output name=tags::$(IFS=, ; echo "${tags[*]}")
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v6
+          push: true
+          tags: ${{ steps.releaseTag.outputs.tags }}
+
+

@@ -1,9 +1,6 @@
 
 # Multiarch RTL433 to MQTT gateway docker
 
-[![Travis-CI](https://travis-ci.org/bademux/rtl_433toMQTT.svg)](https://travis-ci.org/bademux/rtl_433toMQTT)
-
-
 # HowTo
 To run on host 
 ```bash
@@ -11,7 +8,7 @@ vidPid="0bda:2838"
 devPath="/dev/bus/usb/$(lsusb -d $vidPid | sed 's/^.*Bus\s\([0-9]\+\)\sDevice\s\([0-9]\+\).*$/\1\/\2/g')"
 chown $USER $devPath
 docker run --read-only --network="host" --device=$devPath \
- -e RTL_OPTS="-g25 -F mqtt://localhost:1883,retain=0,devices=sensors/rtl_433/P[protocol:255]/C[channel:0] -M newmodel -M protocol -M time:iso"
+ -e RTL_OPTS="-g25 -F mqtt://localhost:1883,retain=0,devices=sensors/rtl_433/P[protocol:255]/C[channel:0] -M newmodel -M protocol -M time:iso" \ 
  bademux/rtl_433tomqtt:latest
 ```
 
